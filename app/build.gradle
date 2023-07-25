@@ -11,8 +11,8 @@ android {
         applicationId "com.JARDAD.EJournal"
         minSdk 26
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 23_07_25_22
+        versionName "23.07.25.22"
 
         multiDexEnabled = true
     }
