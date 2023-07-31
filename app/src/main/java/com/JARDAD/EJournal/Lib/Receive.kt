@@ -2,6 +2,7 @@ package com.JARDAD.EJournal.Lib
 
 import android.util.Base64
 import android.util.Log
+import com.JARDAD.EJournal.JCipher
 import org.json.JSONObject
 import java.net.Socket
 import kotlin.concurrent.thread
@@ -20,6 +21,8 @@ abstract class Receive(val socket: Socket) {
     private var reader = 0
 
     private val bytes = ArrayList<Byte>()
+
+    var cipher: JCipher? = null
 
     fun begin() {
 

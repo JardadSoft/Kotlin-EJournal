@@ -2,6 +2,7 @@ package com.JARDAD.EJournal.Lib
 
 import android.util.Base64
 import android.util.Log
+import com.JARDAD.EJournal.JCipher
 import org.json.JSONObject
 import java.net.Socket
 import kotlin.concurrent.thread
@@ -15,6 +16,8 @@ abstract class Send(val socket: Socket) {
     private var isEmitting = false
 
     private val output = socket.getOutputStream()
+
+    var cipher: JCipher? = null
 
     abstract fun on(json: JSONObject)
     abstract fun onError()
@@ -52,9 +55,17 @@ abstract class Send(val socket: Socket) {
 
             try {
 
-                val bytes = json.toString().toByteArray()
+                var text_64= ""
 
-                val text_64 = Base64.encodeToString(bytes, Base64.DEFAULT)
+                if (cipher == null) {
+
+                    text_64 = Base64.encodeToString(json.toString().toByteArray(Charsets.UTF_8), Base64.DEFAULT)
+
+                } else {
+                    text_64 = cipher!!.Encrypt(json)
+                }
+
+                Log.d(tag,text_64)
 
                 output.write(text_64.toByteArray())
                 output.write(byteArrayOf(0XFF.toByte()))

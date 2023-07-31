@@ -6,7 +6,7 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-class JCipher(val key: String) {
+class JCipher( key: String) {
 
     private val tag = "#JARDAD #" + this.javaClass.simpleName
 
@@ -14,11 +14,11 @@ class JCipher(val key: String) {
 
     private val k = SecretKeySpec(key.toByteArray(), "AES")
 
-    private val CEncrypt = Cipher.getInstance("AES/CBC/PKCS5Padding").apply {
-        init(javax.crypto.Cipher.ENCRYPT_MODE, k, javax.crypto.spec.IvParameterSpec(kiv))
+    private val CEncrypt = Cipher.getInstance("AES/CBC/PKCS7Padding").apply {
+        init(Cipher.ENCRYPT_MODE, k, IvParameterSpec(kiv))
     }
 
-    private val CDecrypt = Cipher.getInstance("AES/CBC/PKCS5Padding").apply {
+    private val CDecrypt = Cipher.getInstance("AES/CBC/PKCS7Padding").apply {
         init(Cipher.DECRYPT_MODE, k, IvParameterSpec(kiv))
     }
 
@@ -29,7 +29,7 @@ class JCipher(val key: String) {
 
     fun Decrypt(cipher_text: String): JSONObject {
         val bytes = Base64.decode(cipher_text, Base64.DEFAULT)
-        return JSONObject(CDecrypt.doFinal(bytes).toString(Charsets.UTF_8))
+        return JSONObject(CDecrypt.doFinal(bytes).toString())
     }
 
 }

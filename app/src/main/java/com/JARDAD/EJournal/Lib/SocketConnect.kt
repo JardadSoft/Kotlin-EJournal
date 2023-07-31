@@ -2,10 +2,15 @@ package com.JARDAD.EJournal.Lib
 
 import android.util.Base64
 import android.util.Log
+import com.JARDAD.EJournal.JCipher
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.net.Socket
+import java.nio.charset.StandardCharsets
+import java.security.KeyFactory
+import java.security.spec.EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
+import java.util.UUID
+import javax.crypto.Cipher
 import kotlin.concurrent.thread
 
 abstract class SocketConnect {
@@ -29,6 +34,42 @@ abstract class SocketConnect {
 
                 input = object : Receive(socket!!) {
                     override fun on(json: JSONObject) {
+
+                        if (json.has("Key")) {
+
+                            val key_text = json.getString("Key")
+
+                            val key_bytes = Base64.decode(key_text, Base64.DEFAULT)
+
+                            val rsa = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding")
+
+                            val keySpec: EncodedKeySpec = X509EncodedKeySpec(key_bytes)
+                            val keyFactory = KeyFactory.getInstance("RSA")
+                            val key = keyFactory.generatePublic(keySpec)
+
+                            rsa.init(Cipher.ENCRYPT_MODE, key)
+
+                            val k = UUID.randomUUID().toString().replace("-", "")
+
+                            val encryptedBytes =
+                                rsa.doFinal(k.toByteArray())
+
+                            Log.i(tag, k)
+
+                            var json = JSONObject()
+                            json.put("Key", Base64.encodeToString(encryptedBytes, Base64.DEFAULT))
+
+                            output!!.emit(json)
+
+                            val cipher = JCipher(k.uppercase())
+                            output!!.cipher = cipher
+
+                            json = JSONObject()
+                            json.put("Name", "-JARDAD-")
+                            json.put("Description", "-صدام المعمري-")
+
+                            output!!.emit(json)
+                        }
 
                     }
 
@@ -57,12 +98,12 @@ abstract class SocketConnect {
                 Log.e(tag, "Connect", ex)
             }
 
-
-            val json = JSONObject()
-
-            json.put("Company", "JARDAD")
-
-            output?.emit(json)
+//
+//            val json = JSONObject()
+//
+//            json.put("Company", "JARDAD")
+//
+//            output?.emit(json)
         }
 //        val output = socket?.getOutputStream()
 //
@@ -80,7 +121,7 @@ abstract class SocketConnect {
 
     }
 
-    fun Send(){
+    fun Send() {
 
         val json = JSONObject()
 
